@@ -3,13 +3,36 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "tsc --noEmit && bun run --watch src/main.ts",
+    "bundle": "tsc --noEmit && bun build --target=bun ./src/main.ts --outdir=dist --minify-identifiers --minify-syntax --sourcemap=external",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "bun run dist/main.js",
+    "db:push": "prisma db push",
+    "db:pull": "drizzle-kit introspect:pg"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@elysiajs/bearer": "latest",
+    "@elysiajs/jwt": "latest",
+    "drizzle-orm": "latest",
+    "elysia": "latest",
+    "fp-ts": "latest",
+    "ioredis": "latest",
+    "pg": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@cspell/eslint-plugin": "latest",
+    "@types/pg": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "bun-types": "latest",
+    "drizzle-kit": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-import-helpers": "latest",
+    "eslint-plugin-prettier": "latest",
+    "prettier": "latest",
+    "prisma": "latest",
+    "typescript": "latest"
   },
-  "module": "src/index.js"
+  "module": "src/main.js"
 }
