@@ -1,4 +1,3 @@
-import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
@@ -14,30 +13,35 @@ import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreateUser, User } from "@root/shared/IO/user-io";
 
 import { user } from "../models/user-model";
+import { Effect, Either, flow, pipe } from "effect";
 
 export class UserRepository {
   constructor(private db: Database) {}
 
   public findById(
     userId: number
-  ): TE.TaskEither<DatabaseQueryError | DatabaseQueryNotFoundError, User> {
+  ): Effect.Effect<
+    never,
+    DatabaseQueryError | DatabaseQueryNotFoundError,
+    User
+  > {
     return pipe(
-      TE.tryCatch(
-        () =>
+      Effect.tryPromise({
+        try: () =>
           this.db.query.user.findFirst({
             where: ({ id }, { eq }) => eq(id, userId)
           }),
-        databaseQueryError
-      ),
-      TE.chainW(
-        TE.fromNullable(
-          databaseQueryNotFoundError({
-            table: user,
-            target: {
-              column: user.id,
-              value: userId
-            }
-          })
+        catch: databaseQueryError
+      }),
+      Effect.flatMap(
+        flow(
+          Effect.fromNullable,
+          Effect.mapError(e =>
+            databaseQueryNotFoundError({
+              table: user,
+              target: { column: user.id, value: userId }
+            })
+          )
         )
       )
     );

@@ -1,9 +1,9 @@
 import { pipe } from "fp-ts/function";
-import * as TE from "fp-ts/TaskEither";
 
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
 import { encodeError } from "@root/shared/errors/encode";
 import type { User } from "@root/shared/IO/user-io";
+import { Effect } from "effect";
 
 export const getUser = ({
   userId,
@@ -14,8 +14,7 @@ export const getUser = ({
 }): Promise<Omit<User, "password">> =>
   pipe(
     userRepository.findById(userId),
-    TE.match(encodeError, user => ({
-      name: user.name,
-      id: user.id
-    }))
-  )();
+    Effect.map(user => ({ id: user.id, name: user.name })),
+    Effect.match({ onFailure: e => encodeError(e), onSuccess: m => m }),
+    Effect.runPromise
+  );

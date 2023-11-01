@@ -15,6 +15,7 @@
     "@elysiajs/bearer": "latest",
     "@elysiajs/jwt": "latest",
     "drizzle-orm": "latest",
+    "effect": "latest",
     "elysia": "latest",
     "fp-ts": "latest",
     "ioredis": "latest",

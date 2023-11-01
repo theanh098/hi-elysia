@@ -5,6 +5,7 @@ import * as TE from "fp-ts/TaskEither";
 import { authPlugin } from "@root/plugins/auth-plugin";
 import { repositoriesPlugin } from "@root/plugins/repositories-plugin";
 import { encodeError } from "@root/shared/errors/encode";
+import { getPost } from "@root/handlers/get-post";
 
 export const postController = new Elysia()
   .use(repositoriesPlugin)
@@ -18,11 +19,7 @@ export const postController = new Elysia()
               repositories: { postRepository }
             },
             params: { id }
-          }) =>
-            pipe(
-              postRepository.findById(id),
-              TE.matchW(encodeError, res => res)
-            )(),
+          }) => getPost({ id, postRepository }),
           {
             params: t.Object({
               id: t.Numeric()

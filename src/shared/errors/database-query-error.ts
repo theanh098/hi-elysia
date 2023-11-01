@@ -18,3 +18,9 @@ export const databaseQueryError = (e: unknown): DatabaseQueryError => ({
 
 export const isDatabaseQueryError = (err: AnyHow): err is DatabaseQueryError =>
   err._tag === databaseQueryErrorTag;
+
+export class DatabaseQueryErrorAdapter extends Error {
+  constructor(public message: string) {
+    super(message);
+  }
+}

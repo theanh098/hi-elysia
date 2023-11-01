@@ -1,4 +1,3 @@
-import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
@@ -15,30 +14,35 @@ import type { CreatePost, Post } from "@root/shared/IO/post-io";
 
 import { post } from "../models/post-model";
 import { user } from "../models/user-model";
+import { Effect, pipe, flow } from "effect";
 
 export class PostRepository {
   constructor(private db: Database) {}
 
   public findById(
     postId: number
-  ): TE.TaskEither<DatabaseQueryError | DatabaseQueryNotFoundError, Post> {
+  ): Effect.Effect<
+    never,
+    DatabaseQueryError | DatabaseQueryNotFoundError,
+    Post
+  > {
     return pipe(
-      TE.tryCatch(
-        () =>
+      Effect.tryPromise({
+        try: () =>
           this.db.query.post.findFirst({
             where: ({ id }, { eq }) => eq(id, postId)
           }),
-        e => databaseQueryError(e)
-      ),
-      TE.chainW(
-        TE.fromNullable(
-          databaseQueryNotFoundError({
-            table: user,
-            target: {
-              column: post.id,
-              value: postId
-            }
-          })
+        catch: e => databaseQueryError(e)
+      }),
+      Effect.flatMap(
+        flow(
+          Effect.fromNullable,
+          Effect.mapError(e =>
+            databaseQueryNotFoundError({
+              table: post,
+              target: { column: post.id, value: postId }
+            })
+          )
         )
       )
     );

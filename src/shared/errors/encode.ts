@@ -9,10 +9,16 @@ import {
   InfrastructureErrorAdapter,
   isInfrastructureError
 } from "./infrastructure-error";
+import {
+  DatabaseQueryErrorAdapter,
+  isDatabaseQueryError
+} from "./database-query-error";
 
 export type AnyHow = { _tag: symbol };
 
 export const encodeError = (err: AnyHow): never => {
+  console.log("err: ", err);
+
   if (isInfrastructureError(err))
     throw new InfrastructureErrorAdapter(err.reason);
 
@@ -24,6 +30,9 @@ export const encodeError = (err: AnyHow): never => {
         err.target.column.name
       } is '${err.target.value}'`
     );
+
+  if (isDatabaseQueryError(err))
+    throw new DatabaseQueryErrorAdapter("database query error");
 
   throw new InfrastructureErrorAdapter("Unspecific error");
 };
