@@ -1,7 +1,8 @@
 import jwt from "@elysiajs/jwt";
-import { readConfig } from "@root/helpers/read-config";
 import { Effect } from "effect";
 import Elysia from "elysia";
+
+import { readConfig } from "@root/helpers/read-config";
 
 export const signingJwtPlugin = new Elysia()
   .use(

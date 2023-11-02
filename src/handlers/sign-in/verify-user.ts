@@ -1,3 +1,5 @@
+import { Effect, pipe } from "effect";
+
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
 import type { AuthError } from "@root/shared/errors/auth-error";
 import { authError } from "@root/shared/errors/auth-error";
@@ -6,7 +8,6 @@ import { isDatabaseQueryNotFoundError } from "@root/shared/errors/database-query
 import type { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { LoginPayload, User } from "@root/shared/IO/user-io";
-import { Effect, pipe, Boolean, Random } from "effect";
 
 export const verifyUser = ({
   name,
@@ -35,15 +36,7 @@ export const verifyUser = ({
         })
       )
     ),
-    Effect.mapError(e => {
-      let r = pipe(
-        e,
-        isDatabaseQueryNotFoundError,
-        Boolean.match({
-          onFalse: () => e,
-          onTrue: () => authError("User not found")
-        })
-      );
-      return isDatabaseQueryNotFoundError(e) ? authError("User not found") : e;
-    })
+    Effect.mapError(e =>
+      isDatabaseQueryNotFoundError(e) ? authError("User not found") : e
+    )
   );

@@ -9,6 +9,7 @@ import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreatePost, Post } from "@root/shared/IO/post-io";
 
 import { Effect, flow, pipe, Option, ReadonlyArray } from "effect";
+
 import { post } from "../models/post-model";
 
 export class PostRepository {

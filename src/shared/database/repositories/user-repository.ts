@@ -9,6 +9,7 @@ import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreateUser, User } from "@root/shared/IO/user-io";
 
 import { user } from "../models/user-model";
+
 import { Effect, Option, ReadonlyArray, flow, pipe } from "effect";
 
 export class UserRepository {
@@ -32,7 +33,7 @@ export class UserRepository {
       Effect.flatMap(
         flow(
           Effect.fromNullable,
-          Effect.mapError(e =>
+          Effect.mapError(() =>
             databaseQueryNotFoundError({
               table: "user",
               target: { column: "id", value: userId }

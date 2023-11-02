@@ -1,8 +1,9 @@
+import { Effect, pipe } from "effect";
+
 import type { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { User } from "@root/shared/IO/user-io";
 import type { JWT } from "@root/types/jwt";
-import { Effect, pipe } from "effect";
 
 export const generateTokens = ({
   jwtAccess,

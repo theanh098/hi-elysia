@@ -44,3 +44,4 @@ package-lock.json
 
 /drizzle
 /tsconfig
+/dump.rdb

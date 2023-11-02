@@ -1,4 +1,5 @@
 import { toError } from "@root/helpers/to-error";
+
 import type { AnyHow } from "./encode";
 
 const infrastructureErrorTag: unique symbol = Symbol("InfrastructureErrorTag");
