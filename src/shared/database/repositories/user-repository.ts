@@ -38,8 +38,8 @@ export class UserRepository {
           Effect.fromNullable,
           Effect.mapError(e =>
             databaseQueryNotFoundError({
-              table: user,
-              target: { column: user.id, value: userId }
+              table: "user",
+              target: { column: "id", value: userId }
             })
           )
         )
@@ -85,9 +85,9 @@ export class UserRepository {
       TE.chainW(
         TE.fromNullable(
           databaseQueryNotFoundError({
-            table: user,
+            table: "user",
             target: {
-              column: user.name,
+              column: "name",
               value: name
             }
           })

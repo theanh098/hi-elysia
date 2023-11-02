@@ -10,9 +10,9 @@ export const databaseQueryNotFoundErrorTag: unique symbol = Symbol(
 
 export type DatabaseQueryNotFoundError = Readonly<{
   _tag: typeof databaseQueryNotFoundErrorTag;
-  table: ElysiaTable;
+  table: string;
   target: {
-    column: PgColumn;
+    column: string;
     value: string | number | boolean | null | undefined;
   };
 }>;
@@ -21,9 +21,9 @@ export const databaseQueryNotFoundError = ({
   table,
   target
 }: {
-  table: ElysiaTable;
+  table: string;
   target: {
-    column: PgColumn;
+    column: string;
     value: string | number | boolean | null | undefined;
   };
 }): DatabaseQueryNotFoundError => ({

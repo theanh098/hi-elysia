@@ -12,9 +12,8 @@ import type { InfrastructureError } from "@root/shared/errors/infrastructure-err
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreatePost, Post } from "@root/shared/IO/post-io";
 
+import { Effect, flow, pipe, Either } from "effect";
 import { post } from "../models/post-model";
-import { user } from "../models/user-model";
-import { Effect, pipe, flow } from "effect";
 
 export class PostRepository {
   constructor(private db: Database) {}
@@ -37,10 +36,10 @@ export class PostRepository {
       Effect.flatMap(
         flow(
           Effect.fromNullable,
-          Effect.mapError(e =>
+          Effect.mapError(() =>
             databaseQueryNotFoundError({
-              table: post,
-              target: { column: post.id, value: postId }
+              table: "post",
+              target: { column: "id", value: postId }
             })
           )
         )

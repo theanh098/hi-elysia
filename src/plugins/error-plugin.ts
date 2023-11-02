@@ -13,9 +13,6 @@ export const errorPlugin = new Elysia()
     DatbaseNotFoundError: DatabaseQueryErrorAdapter
   })
   .onError(({ code, set, error }) => {
-    console.log("code ", code);
-    console.log("error ", error);
-
     switch (code) {
       case "InfrastructureError":
       case "DatabaseQueryNotFoundError":
