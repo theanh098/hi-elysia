@@ -1,5 +1,4 @@
-import * as E from "fp-ts/Either";
-
+import { toError } from "@root/helpers/to-error";
 import type { AnyHow } from "./encode";
 
 export const databaseQueryErrorTag: unique symbol = Symbol(
@@ -13,7 +12,7 @@ export type DatabaseQueryError = Readonly<{
 
 export const databaseQueryError = (e: unknown): DatabaseQueryError => ({
   _tag: databaseQueryErrorTag,
-  reason: E.toError(e)
+  reason: toError(e)
 });
 
 export const isDatabaseQueryError = (err: AnyHow): err is DatabaseQueryError =>

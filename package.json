@@ -17,7 +17,6 @@
     "drizzle-orm": "latest",
     "effect": "latest",
     "elysia": "latest",
-    "fp-ts": "latest",
     "ioredis": "latest",
     "pg": "latest"
   },

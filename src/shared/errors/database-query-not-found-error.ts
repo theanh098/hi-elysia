@@ -1,7 +1,3 @@
-import type { PgColumn } from "drizzle-orm/pg-core";
-
-import type { ElysiaTable } from "@root/shared/database";
-
 import type { AnyHow } from "./encode";
 
 export const databaseQueryNotFoundErrorTag: unique symbol = Symbol(

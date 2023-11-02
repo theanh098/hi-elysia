@@ -1,7 +1,3 @@
-import * as B from "fp-ts/boolean";
-import { pipe } from "fp-ts/function";
-import * as TE from "fp-ts/TaskEither";
-
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
 import type { AuthError } from "@root/shared/errors/auth-error";
 import { authError } from "@root/shared/errors/auth-error";
@@ -10,34 +6,44 @@ import { isDatabaseQueryNotFoundError } from "@root/shared/errors/database-query
 import type { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { LoginPayload, User } from "@root/shared/IO/user-io";
+import { Effect, pipe, Boolean, Random } from "effect";
 
 export const verifyUser = ({
   name,
   password,
   userRepository
-}: LoginPayload & { userRepository: UserRepository }): TE.TaskEither<
+}: LoginPayload & { userRepository: UserRepository }): Effect.Effect<
+  never,
   InfrastructureError | AuthError | DatabaseQueryError,
   User
 > =>
   pipe(
     userRepository.findByName(name),
-    TE.bindTo("user"),
-    TE.bindW("isValid", ({ user }) =>
-      TE.tryCatch(
-        () => Bun.password.verify(password, user.password),
-        e => infrastructureError(JSON.stringify(e))
-      )
+    Effect.bindTo("user"),
+    Effect.bind("isValid", ({ user }) =>
+      Effect.tryPromise({
+        try: () => Bun.password.verify(password, user.password),
+        catch: infrastructureError
+      })
     ),
-    TE.chainW(({ isValid, user }) =>
+    Effect.flatMap(({ isValid, user }) =>
       pipe(
         isValid,
-        B.foldW(
-          () => TE.left(authError("Wrong password")),
-          () => TE.of(user)
-        )
+        Effect.if({
+          onFalse: Effect.fail(authError("Wrong password")),
+          onTrue: Effect.succeed(user)
+        })
       )
     ),
-    TE.mapError(e =>
-      isDatabaseQueryNotFoundError(e) ? authError("User not found") : e
-    )
+    Effect.mapError(e => {
+      let r = pipe(
+        e,
+        isDatabaseQueryNotFoundError,
+        Boolean.match({
+          onFalse: () => e,
+          onTrue: () => authError("User not found")
+        })
+      );
+      return isDatabaseQueryNotFoundError(e) ? authError("User not found") : e;
+    })
   );

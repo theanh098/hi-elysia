@@ -1,7 +1,3 @@
-import * as O from "fp-ts/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as TE from "fp-ts/TaskEither";
-
 import type { Database } from "..";
 
 import type { DatabaseQueryError } from "@root/shared/errors/database-query-error";
@@ -13,7 +9,7 @@ import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreateUser, User } from "@root/shared/IO/user-io";
 
 import { user } from "../models/user-model";
-import { Effect, Either, flow, pipe } from "effect";
+import { Effect, Option, ReadonlyArray, flow, pipe } from "effect";
 
 export class UserRepository {
   constructor(private db: Database) {}
@@ -50,22 +46,23 @@ export class UserRepository {
   public create({
     name,
     password
-  }: CreateUser): TE.TaskEither<
+  }: CreateUser): Effect.Effect<
+    never,
     DatabaseQueryError | InfrastructureError,
     User
   > {
     return pipe(
-      TE.tryCatch(
-        () => this.db.insert(user).values({ name, password }).returning(),
-        databaseQueryError
-      ),
-      TE.chainW(
+      Effect.tryPromise({
+        try: () => this.db.insert(user).values({ name, password }).returning(),
+        catch: databaseQueryError
+      }),
+      Effect.flatMap(
         flow(
-          RA.head,
-          O.matchW(
-            () => TE.left(infrastructureError("No record created")),
-            user => TE.of(user)
-          )
+          ReadonlyArray.head,
+          Option.match({
+            onNone: () => Effect.fail(infrastructureError("No record created")),
+            onSome: user => Effect.succeed(user)
+          })
         )
       )
     );
@@ -73,24 +70,31 @@ export class UserRepository {
 
   public findByName(
     name: string
-  ): TE.TaskEither<DatabaseQueryError | DatabaseQueryNotFoundError, User> {
+  ): Effect.Effect<
+    never,
+    DatabaseQueryError | DatabaseQueryNotFoundError,
+    User
+  > {
     return pipe(
-      TE.tryCatch(
-        () =>
+      Effect.tryPromise({
+        try: () =>
           this.db.query.user.findFirst({
             where: (cols, { eq }) => eq(cols.name, name)
           }),
-        databaseQueryError
-      ),
-      TE.chainW(
-        TE.fromNullable(
-          databaseQueryNotFoundError({
-            table: "user",
-            target: {
-              column: "name",
-              value: name
-            }
-          })
+        catch: databaseQueryError
+      }),
+      Effect.flatMap(
+        flow(
+          Effect.fromNullable,
+          Effect.mapError(() =>
+            databaseQueryNotFoundError({
+              table: "user",
+              target: {
+                column: "name",
+                value: name
+              }
+            })
+          )
         )
       )
     );

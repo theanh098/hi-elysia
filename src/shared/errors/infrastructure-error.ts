@@ -1,15 +1,16 @@
+import { toError } from "@root/helpers/to-error";
 import type { AnyHow } from "./encode";
 
 const infrastructureErrorTag: unique symbol = Symbol("InfrastructureErrorTag");
 
 export type InfrastructureError = {
   _tag: typeof infrastructureErrorTag;
-  reason: string;
+  reason: Error;
 };
 
-export const infrastructureError = (reason: string): InfrastructureError => ({
+export const infrastructureError = (e: unknown): InfrastructureError => ({
   _tag: infrastructureErrorTag,
-  reason
+  reason: toError(e)
 });
 
 export const isInfrastructureError = (
