@@ -1,28 +1,25 @@
 import type { AnyHow } from "./encode";
 
-const missingEnvironmentErrorTag: unique symbol = Symbol(
-  "MissingEnvironmentErrorTag"
-);
-
-export type MissingEnvironmentError = {
-  _tag: typeof missingEnvironmentErrorTag;
-  config: string;
-};
-
-export const missingEnvironmentError = (
-  config: string
-): MissingEnvironmentError => ({
-  _tag: missingEnvironmentErrorTag,
-  config
-});
-
-export const isMissingEnvironmentError = (
-  error: AnyHow
-): error is MissingEnvironmentError =>
-  error._tag === missingEnvironmentErrorTag;
-
 export class MissingEnvironmentErrorAdapter extends Error {
   constructor(public message: string) {
     super(message);
+  }
+}
+
+export class MissingEnvironmentError {
+  static readonly _tag: unique symbol = Symbol("MissingEnvironmentErrorTag");
+
+  static isBounded(err: AnyHow): err is MissingEnvironmentError {
+    return MissingEnvironmentError._tag === err._tag;
+  }
+
+  public _tag = MissingEnvironmentError._tag;
+
+  constructor(public config: string) {}
+
+  public endCode(): MissingEnvironmentErrorAdapter {
+    return new MissingEnvironmentErrorAdapter(
+      `Missing enironment: ${this.config}`
+    );
   }
 }

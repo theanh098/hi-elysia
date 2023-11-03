@@ -8,7 +8,7 @@ import type { InfrastructureError } from "@root/shared/errors/infrastructure-err
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreatePost, Post } from "@root/shared/IO/post-io";
 
-import { Effect, flow, pipe, Option, ReadonlyArray } from "effect";
+import { Effect, flow, pipe, Option, ReadonlyArray, Chunk } from "effect";
 
 import { post } from "../models/post-model";
 
@@ -54,7 +54,8 @@ export class PostRepository {
       }),
       Effect.flatMap(
         flow(
-          ReadonlyArray.head,
+          Chunk.fromIterable,
+          Chunk.head,
           Option.match({
             onNone: () => Effect.fail(infrastructureError("No record created")),
             onSome: user => Effect.succeed(user)

@@ -1,4 +1,4 @@
-import { Effect, pipe } from "effect";
+import { Chunk, Effect, pipe } from "effect";
 
 import type { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import { infrastructureError } from "@root/shared/errors/infrastructure-error";
@@ -19,13 +19,19 @@ export const generateTokens = ({
   { accessToken: string; refreshToken: string }
 > =>
   pipe(
-    Effect.tryPromise({
-      try: () =>
-        Promise.all([
-          jwtAccess.sign({ ...user, id: user.id.toString() }),
-          jwtRefresh.sign({ id: user.id.toString() })
-        ]),
-      catch: e => infrastructureError(JSON.stringify(e))
-    }),
+    Chunk.empty(),
+    Chunk.append(
+      Effect.tryPromise({
+        try: () => jwtAccess.sign({ ...user, id: user.id.toString() }),
+        catch: infrastructureError
+      })
+    ),
+    Chunk.append(
+      Effect.tryPromise({
+        try: () => jwtRefresh.sign({ id: user.id.toString() }),
+        catch: infrastructureError
+      })
+    ),
+    Effect.all,
     Effect.map(([accessToken, refreshToken]) => ({ accessToken, refreshToken }))
   );

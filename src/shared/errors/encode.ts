@@ -1,34 +1,7 @@
-import { AuthErrorAdapter, isAuthError } from "./auth-error";
-import {
-  DatabaseQueryErrorAdapter,
-  isDatabaseQueryError
-} from "./database-query-error";
-import {
-  DatabaseQueryNotFoundErrorAdapter,
-  isDatabaseQueryNotFoundError
-} from "./database-query-not-found-error";
-import {
-  InfrastructureErrorAdapter,
-  isInfrastructureError
-} from "./infrastructure-error";
+export type AnyHow = { _tag: symbol; endCode: () => unknown };
 
-export type AnyHow = { _tag: symbol };
-
-export const encodeError = (err: AnyHow): never => {
-  if (isInfrastructureError(err))
-    throw new InfrastructureErrorAdapter(err.reason.message);
-
-  if (isAuthError(err)) throw new AuthErrorAdapter(err.reason);
-
-  if (isDatabaseQueryNotFoundError(err))
-    throw new DatabaseQueryNotFoundErrorAdapter(
-      `Not found records on table ${err.table} with ${err.target.column} is '${err.target.value}'`
-    );
-
-  if (isDatabaseQueryError(err))
-    throw new DatabaseQueryErrorAdapter("database query error");
-
-  throw new InfrastructureErrorAdapter("Unspecific error");
+export const encodeError = <T>(err: AnyHow): never => {
+  throw err.endCode();
 };
 
 // export const getError = (error: FiberFailure): AnyHow =>
