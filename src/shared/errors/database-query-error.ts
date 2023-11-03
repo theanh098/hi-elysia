@@ -1,26 +1,28 @@
 import { toError } from "@root/helpers/to-error";
 
 import type { AnyHow } from "./encode";
-
-export const databaseQueryErrorTag: unique symbol = Symbol(
-  "DatabaseQueryErrorTag"
-);
-
-export type DatabaseQueryError = Readonly<{
-  _tag: typeof databaseQueryErrorTag;
-  reason: Error;
-}>;
-
-export const databaseQueryError = (e: unknown): DatabaseQueryError => ({
-  _tag: databaseQueryErrorTag,
-  reason: toError(e)
-});
-
-export const isDatabaseQueryError = (err: AnyHow): err is DatabaseQueryError =>
-  err._tag === databaseQueryErrorTag;
+import { error } from "effect/Brand";
 
 export class DatabaseQueryErrorAdapter extends Error {
   constructor(public message: string) {
     super(message);
+  }
+}
+
+export class DatabaseQueryError implements AnyHow {
+  static readonly _tag: unique symbol = Symbol("MissingEnvironmentErrorTag");
+
+  static isBounded(err: AnyHow): err is DatabaseQueryError {
+    return DatabaseQueryError._tag === err._tag;
+  }
+
+  constructor(public error: unknown) {}
+
+  public _tag = DatabaseQueryError._tag;
+
+  public endCode(): DatabaseQueryErrorAdapter {
+    return new DatabaseQueryErrorAdapter(
+      `Database query error with reason ${toError(this.error).message}`
+    );
   }
 }

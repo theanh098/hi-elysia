@@ -1,40 +1,31 @@
 import type { AnyHow } from "./encode";
 
-export const databaseQueryNotFoundErrorTag: unique symbol = Symbol(
-  "DatabaseQueryNotFoundTag"
-);
-
-export type DatabaseQueryNotFoundError = Readonly<{
-  _tag: typeof databaseQueryNotFoundErrorTag;
-  table: string;
-  target: {
-    column: string;
-    value: string | number | boolean | null | undefined;
-  };
-}>;
-
-export const databaseQueryNotFoundError = ({
-  table,
-  target
-}: {
-  table: string;
-  target: {
-    column: string;
-    value: string | number | boolean | null | undefined;
-  };
-}): DatabaseQueryNotFoundError => ({
-  _tag: databaseQueryNotFoundErrorTag,
-  table,
-  target
-});
-
-export const isDatabaseQueryNotFoundError = (
-  err: AnyHow
-): err is DatabaseQueryNotFoundError =>
-  err._tag === databaseQueryNotFoundErrorTag;
-
 export class DatabaseQueryNotFoundErrorAdapter extends Error {
   constructor(public message: string) {
     super(message);
+  }
+}
+
+export class DatabaseQueryNotFoundError implements AnyHow {
+  static readonly _tag: unique symbol = Symbol("MissingEnvironmentErrorTag");
+
+  static isBounded(err: AnyHow): err is DatabaseQueryNotFoundError {
+    return DatabaseQueryNotFoundError._tag === err._tag;
+  }
+
+  constructor(
+    public query: {
+      table: string;
+      column: string;
+      value: string | number | boolean | null | undefined;
+    }
+  ) {}
+
+  public _tag = DatabaseQueryNotFoundError._tag;
+
+  public endCode(): DatabaseQueryNotFoundErrorAdapter {
+    return new DatabaseQueryNotFoundErrorAdapter(
+      `Not found record on table ${this.query.table} with ${this.query.column} = ${this.query.value}`
+    );
   }
 }

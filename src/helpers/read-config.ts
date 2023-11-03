@@ -1,7 +1,6 @@
 import { Config, Effect, pipe } from "effect";
 
-import type { MissingEnvironmentError } from "@root/shared/errors/missing-environment-error";
-import { missingEnvironmentError } from "@root/shared/errors/missing-environment-error";
+import { MissingEnvironmentError } from "@root/shared/errors/missing-environment-error";
 
 export const readConfig = (
   config: string
@@ -9,5 +8,5 @@ export const readConfig = (
   pipe(
     Config.string(config),
     Effect.config,
-    Effect.mapError(() => missingEnvironmentError(config))
+    Effect.mapError(() => new MissingEnvironmentError(config))
   );

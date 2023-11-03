@@ -1,8 +1,6 @@
 import { Effect } from "effect";
 import type { Redis } from "ioredis";
-
-import type { InfrastructureError } from "../errors/infrastructure-error";
-import { infrastructureError } from "../errors/infrastructure-error";
+import { InfrastructureError } from "../errors/infrastructure-error";
 
 export const setRedis = (
   client: Redis,
@@ -11,5 +9,5 @@ export const setRedis = (
 ): Effect.Effect<never, InfrastructureError, "OK"> =>
   Effect.tryPromise({
     try: () => client.set(key, value),
-    catch: infrastructureError
+    catch: e => new InfrastructureError(e)
   });

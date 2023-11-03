@@ -1,14 +1,11 @@
 import type { Database } from "..";
 
-import type { DatabaseQueryError } from "@root/shared/errors/database-query-error";
-import { databaseQueryError } from "@root/shared/errors/database-query-error";
-import type { DatabaseQueryNotFoundError } from "@root/shared/errors/database-query-not-found-error";
-import { databaseQueryNotFoundError } from "@root/shared/errors/database-query-not-found-error";
-import type { InfrastructureError } from "@root/shared/errors/infrastructure-error";
-import { infrastructureError } from "@root/shared/errors/infrastructure-error";
+import { DatabaseQueryError } from "@root/shared/errors/database-query-error";
+import { DatabaseQueryNotFoundError } from "@root/shared/errors/database-query-not-found-error";
+import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreatePost, Post } from "@root/shared/IO/post-io";
 
-import { Effect, flow, pipe, Option, ReadonlyArray, Chunk } from "effect";
+import { Chunk, Effect, flow, Option, pipe } from "effect";
 
 import { post } from "../models/post-model";
 
@@ -28,16 +25,18 @@ export class PostRepository {
           this.db.query.post.findFirst({
             where: ({ id }, { eq }) => eq(id, postId)
           }),
-        catch: e => databaseQueryError(e)
+        catch: e => new DatabaseQueryError(e)
       }),
       Effect.flatMap(
         flow(
           Effect.fromNullable,
-          Effect.mapError(() =>
-            databaseQueryNotFoundError({
-              table: "post",
-              target: { column: "id", value: postId }
-            })
+          Effect.mapError(
+            () =>
+              new DatabaseQueryNotFoundError({
+                table: "post",
+                column: "id",
+                value: postId
+              })
           )
         )
       )
@@ -50,14 +49,15 @@ export class PostRepository {
     return pipe(
       Effect.tryPromise({
         try: () => this.db.insert(post).values(newPost).returning(),
-        catch: databaseQueryError
+        catch: e => new DatabaseQueryError(e)
       }),
       Effect.flatMap(
         flow(
           Chunk.fromIterable,
           Chunk.head,
           Option.match({
-            onNone: () => Effect.fail(infrastructureError("No record created")),
+            onNone: () =>
+              Effect.fail(new InfrastructureError("No record created")),
             onSome: user => Effect.succeed(user)
           })
         )

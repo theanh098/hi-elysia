@@ -6,8 +6,8 @@ import Elysia from "elysia";
 
 import { genericPromise } from "@root/helpers/generic-promise";
 import { readConfig } from "@root/helpers/read-config";
-import { authError } from "@root/shared/errors/auth-error";
-import { infrastructureError } from "@root/shared/errors/infrastructure-error";
+import { AuthError } from "@root/shared/errors/auth-error";
+import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { Claims, RefreshClaims } from "@root/types/auth";
 
 export const authPlugin = <
@@ -42,13 +42,13 @@ export const authPlugin = <
           token =>
             Effect.tryPromise({
               try: () => jwt.verify(token),
-              catch: infrastructureError
+              catch: e => new InfrastructureError(e)
             }),
           Effect.map(claims => claims || null),
           Effect.flatMap(
             flow(
               Effect.fromNullable,
-              Effect.mapError(() => authError("unAuthorized"))
+              Effect.mapError(() => new AuthError())
             )
           ),
           Effect.map(claims => ({

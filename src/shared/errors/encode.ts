@@ -1,6 +1,9 @@
-export type AnyHow = { _tag: symbol; endCode: () => unknown };
+export type AnyHow<T extends Error = Error> = {
+  _tag: symbol;
+  endCode: () => T;
+};
 
-export const encodeError = <T>(err: AnyHow): never => {
+export const encodeError = <T extends Error>(err: AnyHow<T>): never => {
   throw err.endCode();
 };
 

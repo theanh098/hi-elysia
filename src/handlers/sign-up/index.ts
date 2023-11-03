@@ -3,12 +3,12 @@ import type { Redis } from "ioredis";
 
 import { genericPromise } from "@root/helpers/generic-promise";
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
-import { infrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreateUser } from "@root/shared/IO/user-io";
 import { setRedis } from "@root/shared/redis/set";
 import type { JWT } from "@root/types/jwt";
 
 import { generateTokens } from "../../helpers/generate-tokens";
+import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 
 export const signUp = ({
   name,
@@ -28,7 +28,7 @@ export const signUp = ({
       Effect.tryPromise({
         try: () =>
           Bun.password.hash(password, { cost: 8, algorithm: "bcrypt" }),
-        catch: infrastructureError
+        catch: e => new InfrastructureError(e)
       }),
       Effect.bind("user", hashPassword =>
         userRepository.create({ name, password: hashPassword })
