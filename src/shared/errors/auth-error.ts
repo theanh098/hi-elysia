@@ -1,4 +1,4 @@
-import { AnyHow } from "./encode";
+import type { AnyHow } from "./encode";
 
 export class AuthErrorAdapter extends Error {
   constructor(public message: string) {

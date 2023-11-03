@@ -1,11 +1,11 @@
 import { Effect, pipe } from "effect";
 
-import type { LoginPayload, User } from "@root/shared/IO/user-io";
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
 import { AuthError } from "@root/shared/errors/auth-error";
 import type { DatabaseQueryError } from "@root/shared/errors/database-query-error";
 import { DatabaseQueryNotFoundError } from "@root/shared/errors/database-query-not-found-error";
 import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
+import type { LoginPayload, User } from "@root/shared/IO/user-io";
 
 export const verifyUser = ({
   name,

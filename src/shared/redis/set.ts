@@ -1,5 +1,6 @@
 import { Effect } from "effect";
 import type { Redis } from "ioredis";
+
 import { InfrastructureError } from "../errors/infrastructure-error";
 
 export const setRedis = (

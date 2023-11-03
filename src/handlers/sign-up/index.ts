@@ -3,12 +3,12 @@ import type { Redis } from "ioredis";
 
 import { genericPromise } from "@root/helpers/generic-promise";
 import type { UserRepository } from "@root/shared/database/repositories/user-repository";
+import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 import type { CreateUser } from "@root/shared/IO/user-io";
 import { setRedis } from "@root/shared/redis/set";
 import type { JWT } from "@root/types/jwt";
 
 import { generateTokens } from "../../helpers/generate-tokens";
-import { InfrastructureError } from "@root/shared/errors/infrastructure-error";
 
 export const signUp = ({
   name,

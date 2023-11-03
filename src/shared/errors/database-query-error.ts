@@ -1,7 +1,6 @@
 import { toError } from "@root/helpers/to-error";
 
 import type { AnyHow } from "./encode";
-import { error } from "effect/Brand";
 
 export class DatabaseQueryErrorAdapter extends Error {
   constructor(public message: string) {
